@@ -12,6 +12,15 @@ public class Transition {
     }
 
     private Etat etatSrc ;
+
+    public Etat getEtatSrc() {
+        return etatSrc;
+    }
+
+    public String getLettreTr() {
+        return lettreTr;
+    }
+
     private String lettreTr ;
     private Etat etatDest ;
 }

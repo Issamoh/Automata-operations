@@ -1,0 +1,6 @@
+digraph G {
+S5 -> S4
+S0 -> S5
+S0 -> S2
+S2 -> S4
+}
