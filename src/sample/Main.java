@@ -21,6 +21,10 @@ public class Main  {
         automateR.afficherAutomate();
         automate.dessinerAutomate("automate","pdf");
         automateR.dessinerAutomate("automate réduit","pdf");
+        Automate automateF = automate.fermuture();
+       automateF.afficherAutomate();
+       automateF.dessinerAutomate("automate fermuture","pdf");
+
         /*
 
         Graphviz gv = new Graphviz();                           //Graphviz Object.

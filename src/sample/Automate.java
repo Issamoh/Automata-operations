@@ -215,6 +215,62 @@ public class Automate {
         }
         return new Automate(this.alphabet,this.etatInitail,instructionsR,etatsFinauxR,tousEtatsR);
     }
+    public Automate fermuture(){
+        // élimination des transitions avec des mots de longueur supérieur de 1
+        HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsF = (HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>) instructions.clone() ;
+                //new HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>() ;
+        HashSet<Etat> etatsFinauxF = (HashSet<Etat>) etatsFinaux.clone() ;
+        HashMap<String,Etat> tousEtatsF = (HashMap<String,Etat>) tousEtats.clone();
+        for (Etat e:instructions.keySet() // pour chaque état
+        ) {
+            for (Etat f:instructions.get(e).keySet() // pour chaque état destinataire
+            ) {
+                for (String str:instructions.get(e).get(f).keySet() // pour chaque mot de transition
+                ) { // si la transition se fait avec un mot w tq |w| > 1 éclater la transition
+                    if(str.length()>1){
+                        System.out.println("am here");
+                    for (Transition tr: instructions.get(e).get(f).get(str)
+                    ) {
+                        Etat sauv ;
+                        int j = str.length()-1 ;
+                        Etat etattmp = new Etat(tr.getEtatSrc().getName()+"_"+j);
+                        etattmp.setAccessible(tr.getEtatDest().getAccessible());
+                        etattmp.setCoaccessible(tr.getEtatDest().getCoaccessible());
+                        etattmp.setEstInitial(false);
+                        etattmp.setEstFinal(false);
+                        tousEtatsF.put(etattmp.getName(),etattmp);
+                        instructionsF.put(etattmp,new HashMap<Etat,HashMap<String, HashSet<Transition>>>());
+                        instructionsF.get(etattmp).put(tr.getEtatDest(),new HashMap<String,HashSet<Transition>>());
+                        instructionsF.get(etattmp).get(tr.getEtatDest()).put(String.valueOf(str.charAt(j)),new HashSet<Transition>());
+                        instructionsF.get(etattmp).get(tr.getEtatDest()).get(String.valueOf(str.charAt(j))).add(new Transition(etattmp,String.valueOf(str.charAt(j)),tr.getEtatDest()));
+                        sauv =  etattmp;
+                        for (int k = (str.length()-2); k > 0 ; k--) {
+                            etattmp = new Etat(tr.getEtatSrc().getName()+"_"+k);
+                            etattmp.setAccessible(sauv.getAccessible());
+                            etattmp.setCoaccessible(sauv.getCoaccessible());
+                            etattmp.setEstInitial(false);
+                            etattmp.setEstFinal(false);
+                            tousEtatsF.put(etattmp.getName(),etattmp);
+                            instructionsF.put(etattmp,new HashMap<Etat,HashMap<String, HashSet<Transition>>>());
+                            instructionsF.get(etattmp).put(sauv, new HashMap<String, HashSet<Transition>>());
+                            instructionsF.get(etattmp).get(sauv).put(String.valueOf(str.charAt(k)),new HashSet<Transition>());
+                            instructionsF.get(etattmp).get(sauv).get(String.valueOf(str.charAt(k))).add(new Transition(etattmp,String.valueOf(str.charAt(k)),sauv));
+                            sauv =  etattmp;
+                            }
+                        instructionsF.get(e).put(sauv,new HashMap<String, HashSet<Transition>>());
+                        instructionsF.get(e).get(sauv).put(String.valueOf(str.charAt(0)),new HashSet<Transition>());
+                        instructionsF.get(e).get(sauv).get(String.valueOf(str.charAt(0))).add(new Transition(e,String.valueOf(str.charAt(0)),sauv)) ;
+                        instructionsF.get(e).get(f).get(str).remove(tr);
+                        sauv = null ;
+                    }
+
+                    }
+
+                    }}
+                }
+        return new Automate(this.alphabet,this.etatInitail,instructionsF,etatsFinauxF,tousEtatsF);
+                }
+
         public void afficherAutomate()
         {
             System.out.println("alpha :");
