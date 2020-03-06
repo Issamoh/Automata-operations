@@ -3,20 +3,17 @@ package sample;
 import graphvizapi.Graphviz;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.*;
 
 public class Automate {
     private HashSet<Lettre> alphabet ;
     private Etat etatInitail ;
     //private HashMap<Etat, ArrayList<Transition>> instructions ; <- ancienne solution
-    private HashMap<Etat, HashMap<Etat,ArrayList<Transition>>> instructions ;
+    private HashMap<Etat, HashMap<Etat,HashMap<String, HashSet<Transition>>>> instructions ;
     private HashSet<Etat> etatsFinaux ;
     private HashMap<String,Etat> tousEtats ;
 
-    public Automate(HashSet<Lettre> alphabet, Etat etatInitail, HashMap<Etat, HashMap<Etat, ArrayList<Transition>>> instructions, HashSet<Etat> etatsFinaux, HashMap<String, Etat> tousEtats) {
+    public Automate(HashSet<Lettre> alphabet, Etat etatInitail, HashMap<Etat, HashMap<Etat, HashMap<String,HashSet<Transition>>>> instructions, HashSet<Etat> etatsFinaux, HashMap<String, Etat> tousEtats) {
         this.alphabet = alphabet;
         this.etatInitail = etatInitail;
         this.instructions = instructions;
@@ -25,7 +22,7 @@ public class Automate {
     }
 
     public Automate() {
-        instructions = new HashMap<Etat, HashMap<Etat,ArrayList<Transition>>>();
+        instructions = new HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>();
         alphabet = new HashSet<Lettre>();
         etatsFinaux = new HashSet<Etat>();
         tousEtats = new  HashMap<String,Etat>();
@@ -57,7 +54,7 @@ public class Automate {
                     etatsFinaux.add(etat);
                 }
                 tousEtats.put(etat.getName(),etat);
-                instructions.put(etat, new HashMap<Etat,ArrayList<Transition>>());
+                instructions.put(etat, new HashMap<Etat,HashMap<String,HashSet<Transition>>>());
             } else if (!etatInitailDonne) {
                 System.out.println("est ce que c'est un état initial ? (Y/N)");
                 m = sc.next().charAt(0);
@@ -71,7 +68,7 @@ public class Automate {
                     }
                     tousEtats.put(etat.getName(),etat);
                     this.etatInitail = etat;
-                    instructions.put(etat, new HashMap<Etat,ArrayList<Transition>>());
+                    instructions.put(etat, new HashMap<Etat,HashMap<String,HashSet<Transition>>>());
                     etatInitailDonne = true ;
                 }
             }
@@ -95,7 +92,7 @@ public class Automate {
         boolean stop = false;
         for (Etat e: instructions.keySet()
         ) {
-            HashMap<Etat,ArrayList<Transition>> tr = instructions.get(e);
+            HashMap<Etat,HashMap<String,HashSet<Transition>>> tr = instructions.get(e);
             System.out.println("Transitions à partir l'état "+e.getName());
             System.out.println("lettre ( . pour l'epsilon , = pour s'arrêter ) : ");
             s= sc.next();
@@ -108,9 +105,10 @@ public class Automate {
                         if (tousEtats.containsKey(nomDst)) {
                             etatdst = tousEtats.get(nomDst);
                             if (!tr.containsKey(etatdst))
-                            { tr.put(etatdst,new ArrayList<Transition>()) ;
+                            { tr.put(etatdst,new HashMap<String,HashSet<Transition>>()) ;
                             }
-                            tr.get(etatdst).add(new Transition(e, s, etatdst));
+                            if(!tr.get(etatdst).containsKey(s)) {tr.get(etatdst).put(s,new HashSet<Transition>());}
+                            tr.get(etatdst).get(s).add(new Transition(e, s, etatdst));
                             nomDestination = true;
                             System.out.println("prochaine transition ( = pour s'arrêter ) : ");
                         } else {
@@ -139,9 +137,10 @@ public class Automate {
                             if (tousEtats.containsKey(nomDst)) {
                                 etatdst = tousEtats.get(nomDst);
                                 if (!tr.containsKey(etatdst))
-                                { tr.put(etatdst,new ArrayList<Transition>()) ;
+                                { tr.put(etatdst,new HashMap<String,HashSet<Transition>>()) ;
                                 }
-                                tr.get(etatdst).add(new Transition(e, s, etatdst));
+                                if(!tr.get(etatdst).containsKey(s)) {tr.get(etatdst).put(s,new HashSet<Transition>());}
+                                tr.get(etatdst).get(s).add(new Transition(e, s, etatdst));
                                 nomDestination = true;
                             } else {
                                 System.out.println("cette état n'existe pas ! Veuillez corriger");
@@ -193,7 +192,7 @@ public class Automate {
 
             defineEtatCoaccessible(ef);
         }
-         HashMap<Etat, HashMap<Etat,ArrayList<Transition>>> instructionsR = new HashMap<Etat, HashMap<Etat,ArrayList<Transition>>>() ;
+         HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsR = new HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>() ;
          HashSet<Etat> etatsFinauxR = new HashSet<Etat>() ;
          HashMap<String,Etat> tousEtatsR = new  HashMap<String,Etat>() ;
         for (Etat e: this.instructions.keySet()
@@ -201,7 +200,7 @@ public class Automate {
 
             if(tousEtats.get(e.getName()).getCoaccessible() && tousEtats.get(e.getName()).getAccessible()) {
                 //elimination des transitions vers des états non accessible ou non co accessible
-                HashMap<Etat,ArrayList<Transition>> tr = new HashMap<Etat,ArrayList<Transition>>() ;
+                HashMap<Etat,HashMap<String,HashSet<Transition>>> tr = new HashMap<Etat,HashMap<String,HashSet<Transition>>>() ;
                 for (Etat c: instructions.get(e).keySet()
                      ) {
                     if(tousEtats.get(c.getName()).getCoaccessible() && tousEtats.get(c.getName()).getAccessible()){
@@ -215,7 +214,6 @@ public class Automate {
 
         }
         return new Automate(this.alphabet,this.etatInitail,instructionsR,etatsFinauxR,tousEtatsR);
-
     }
         public void afficherAutomate()
         {
@@ -244,15 +242,25 @@ public class Automate {
         public void dessinerAutomate(String nomFile, String type){
             Graphviz gv = new Graphviz();
             gv.addln(gv.start_graph());
-
+            for (Etat h: this.etatsFinaux
+                 ) {
+                gv.addln(h.getName()+" [color=blue];");
+            }
+            gv.addln(this.etatInitail.getName()+" [style=filled, fillcolor=green];");
             for (Etat e:instructions.keySet()
                  ) {
                 for (Etat f:instructions.get(e).keySet()
                      ) {
-                    for (Transition tr: instructions.get(e).get(f)
+                    for (String str:instructions.get(e).get(f).keySet()
                          ) {
-                        gv.addln(tr.getEtatSrc().getName()+" -> "+tr.getEtatDest().getName());
+                        for (Transition tr: instructions.get(e).get(f).get(str)
+                        ) {
+                            gv.addln(tr.getEtatSrc().getName()+" -> "+tr.getEtatDest().getName()+";");
+
+
+                        }
                     }
+
                 }
 
             }
