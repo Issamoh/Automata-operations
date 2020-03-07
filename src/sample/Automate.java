@@ -215,7 +215,7 @@ public class Automate {
         }
         return new Automate(this.alphabet,this.etatInitail,instructionsR,etatsFinauxR,tousEtatsR);
     }
-    public Automate fermuture(){
+    public Automate eliminerLongueTr(){
         // élimination des transitions avec des mots de longueur supérieur de 1
         HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsF = (HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>) instructions.clone() ;
                 //new HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>() ;
@@ -270,7 +270,57 @@ public class Automate {
                 }
         return new Automate(this.alphabet,this.etatInitail,instructionsF,etatsFinauxF,tousEtatsF);
                 }
+        public Automate   eliminerSpontane(){
+            // élimination des transitions spontanées qui sont représentées avec "."
+            // l'dée est de chercher pour chaque état s'il peut transiter vers un autre avec epsilon, si c le cas copier toutes les transitions de ce dernier et recommencer de nouveau car il se peut parmi ces nouvelles transitions il y une avec epsilon.
+            HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsS = (HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>) instructions.clone() ;
+            //new HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>() ;
+            HashSet<Etat> etatsFinauxS = (HashSet<Etat>) etatsFinaux.clone() ;
+            HashMap<String,Etat> tousEtatsS = (HashMap<String,Etat>) tousEtats.clone();
+            boolean pasmodif = true;
+            do {
+                for (Etat e : instructionsS.keySet() // pour chaque état
+                ) {
+                    pasmodif = true;
+                    for (Etat f : instructionsS.get(e).keySet() // pour chaque état destinataire
+                    ) {
+                        if (instructionsS.get(e).get(f).containsKey(".")) {
+                            for (Transition tr : instructionsS.get(e).get(f).get(".")
+                            ) {
+                                if(f.EstFinal()){if(!e.EstFinal()){etatsFinauxS.add(e);e.setEstFinal(true);}}
+                                for (Etat ets : instructionsS.get(f).keySet()
+                                ) {
+                                    for (String chaine : instructionsS.get(f).get(ets).keySet()
+                                    ) {
+                                        for (Transition trans : instructionsS.get(f).get(ets).get(chaine)
+                                        ) {
+                                            if (!instructionsS.get(e).containsKey(trans.getEtatDest())) {
+                                                instructionsS.get(e).put(trans.getEtatDest(), new HashMap<String, HashSet<Transition>>());
+                                            }
+                                            if (!instructionsS.get(e).get(trans.getEtatDest()).containsKey(trans.getLettreTr())) {
+                                                instructionsS.get(e).get(trans.getEtatDest()).put(trans.getLettreTr(), new HashSet<Transition>());
+                                            }
+                                            instructionsS.get(e).get(trans.getEtatDest()).get(trans.getLettreTr()).add(new Transition(e, trans.getLettreTr(), trans.getEtatDest()));
+                                        }
+                                    }
+                                }
+                                System.out.println("i am deleting "+tr.getEtatSrc().getName()+" " + tr.getLettreTr() + " -> " + tr.getEtatDest().getName());
+                                instructionsS.get(e).get(f).get(".").remove(tr);
+                                if (instructionsS.get(e).get(f).get(".").isEmpty())
+                                    instructionsS.get(e).get(f).remove(".");
+                                pasmodif = false;
+                                break;
+                            }
+                        }
+                        if (!pasmodif) break;
+                    }
 
+                    if (!pasmodif) break;
+                }
+            }
+            while (!pasmodif);
+            return new Automate(this.alphabet, this.etatInitail, instructionsS, etatsFinauxS, tousEtatsS);
+        }
         public void afficherAutomate()
         {
             System.out.println("alpha :");

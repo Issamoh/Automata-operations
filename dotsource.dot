@@ -1,11 +1,10 @@
 digraph G {
-S1 [color=blue];
 S0 [style=filled, fillcolor=green];
-S0_3 -> S1;
-S1_2 -> S1;
-S0_1 -> S0_2;
-S0_2 -> S0_3;
-S1_1 -> S1_2;
-S0 -> S0_1;
-S1 -> S1_1;
+S4 -> S0;
+S0 -> S0;
+S0 -> S2;
+S0 -> S3;
+S1 -> S0;
+S1 -> S2;
+S1 -> S3;
 }

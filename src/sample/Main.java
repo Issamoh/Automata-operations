@@ -21,9 +21,11 @@ public class Main  {
         automateR.afficherAutomate();
         automate.dessinerAutomate("automate","pdf");
         automateR.dessinerAutomate("automate réduit","pdf");
-        Automate automateF = automate.fermuture();
+        Automate automateF = automate.eliminerLongueTr();
        automateF.afficherAutomate();
        automateF.dessinerAutomate("automate fermuture","pdf");
+       Automate automateS = automate.eliminerSpontane();
+       automateS.dessinerAutomate("automate spontane","pdf");
 
         /*
 
