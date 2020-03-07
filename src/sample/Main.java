@@ -21,6 +21,10 @@ public class Main  {
         Automate automateC = automate.complement();
         automateC.afficherAutomate();
         automateC.dessinerAutomate("automate complement","pdf");
+       /* Automate automateM = automate.miroire();
+        automateM.afficherAutomate();
+        automateM.dessinerAutomate("automate miroire","pdf");
+
         automate.dessinerAutomate("automate 2","pdf");
         Automate automateD = automate.determiner();
         automateD.afficherAutomate();

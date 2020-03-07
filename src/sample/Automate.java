@@ -396,36 +396,84 @@ public class Automate {
             return new Automate(this.alphabet, this.etatInitail, instructionsD, etatsFinauxD, tousEtatsD);
 
         }
-        public Automate complement(){
+        public Automate miroire(){
 
-            HashMap<String,Etat> tousEtatsC = (HashMap<String,Etat>) tousEtats.clone();
-            HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsC = (HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>) instructions.clone() ;
+            HashMap<String,Etat> tousEtatsM = (HashMap<String,Etat>) tousEtats.clone();
+            HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsM = new HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>();
+            for (Etat st: instructions.keySet()
+                 ) {
+                instructionsM.put(st,new HashMap<Etat,HashMap<String, HashSet<Transition>>>());
+            }
+            for (Etat st: instructions.keySet()
+            ) {
+                for (Etat dst: instructions.get(st).keySet()
+                     ) {
+                    for (String str:instructions.get(st).get(dst).keySet()
+                         ) {
+                        for (Transition trs:instructions.get(st).get(dst).get(str)
+                             ) {
+                            instructionsM.get(dst).put(st,new HashMap<String, HashSet<Transition>>());
+                            instructionsM.get(dst).get(st).put(str,new HashSet<Transition>());
+                            instructionsM.get(dst).get(st).get(str).add(new Transition(dst,str,st));
+                        }
+                    }
+                }
+            }
+
           //  if(etatsFinaux.size()>1) {
                 String name = "";
                 for (Etat ef : etatsFinaux
                 ) {
                     name = name.concat(ef.getName());
                 }
-                Etat etatInitailC = new Etat(name);
-                etatInitailC.setEstInitial(true);
-                tousEtatsC.put(name, etatInitailC);
-                instructionsC.put(etatInitailC, new HashMap<Etat, HashMap<String, HashSet<Transition>>>());
+                Etat etatInitailM = new Etat(name);
+                etatInitailM.setEstInitial(true);
+                tousEtatsM.put(name, etatInitailM);
+                instructionsM.put(etatInitailM, new HashMap<Etat, HashMap<String, HashSet<Transition>>>());
                 for (Etat ef : etatsFinaux
                 ) {
-                    tousEtatsC.get(ef.getName()).setEstFinal(false);
-                    instructionsC.get(etatInitailC).put(ef, new HashMap<String, HashSet<Transition>>());
-                    instructionsC.get(etatInitailC).get(ef).put(".", new HashSet<Transition>());
-                    instructionsC.get(etatInitailC).get(ef).get(".").add(new Transition(etatInitailC, ".", ef));
+                    tousEtatsM.get(ef.getName()).setEstFinal(false);
+                    instructionsM.get(etatInitailM).put(ef, new HashMap<String, HashSet<Transition>>());
+                    instructionsM.get(etatInitailM).get(ef).put(".", new HashSet<Transition>());
+                    instructionsM.get(etatInitailM).get(ef).get(".").add(new Transition(etatInitailM, ".", ef));
                 }
 
 
 
-                HashSet<Etat> etatsFinauxC = new HashSet<Etat>();
-                Etat etatF = tousEtatsC.get(this.etatInitail.getName());
+                HashSet<Etat> etatsFinauxM = new HashSet<Etat>();
+                Etat etatF = tousEtatsM.get(this.etatInitail.getName());
                 etatF.setEstFinal(true);
                 etatF.setEstInitial(false);
-                etatsFinauxC.add(etatF);
-                return new Automate(this.alphabet, etatInitailC, instructionsC, etatsFinauxC, tousEtatsC);
+                etatsFinauxM.add(etatF);
+                return new Automate(this.alphabet, etatInitailM, instructionsM, etatsFinauxM, tousEtatsM);
+        }
+        public Automate complement()
+        {
+            HashMap<String,Etat> tousEtatsC = (HashMap<String,Etat>) tousEtats.clone();
+            HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsC = (HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>) instructions.clone();
+            HashSet<Etat> etatsFinauxC = (HashSet<Etat>) etatsFinaux.clone();
+            for (Etat etat:tousEtatsC.values()
+                 ) {
+                if(etat.EstFinal()) {
+                    etatsFinauxC.remove(etat);
+                    etat.setEstFinal(false);
+                }
+                else {
+                    etat.setEstFinal(true);
+                    etatsFinauxC.add(etat);
+                }
+                }
+         /*   Etat etatInitialC = tousEtatsC.get(etatInitail.getName());
+            if(etatInitialC.EstFinal()) {
+                etatsFinauxC.remove(etatInitialC);
+                etatInitialC.setEstFinal(false);
+            }
+            else {
+                etatInitialC.setEstFinal(true);
+                etatsFinauxC.add(etatInitialC);
+            }
+*/
+            return new Automate(this.alphabet,tousEtatsC.get(etatInitail.getName()), instructionsC, etatsFinauxC, tousEtatsC);
         }
         public void afficherAutomate()
         {
@@ -486,7 +534,7 @@ public class Automate {
 
             }
             gv.addln(gv.end_graph());
-            File out = new File("C:/graphViz/"+nomFile+"."+ type);
+            File out = new File("C:/graphViz/results/"+nomFile+"."+ type);
             gv.writeGraphToFile( gv.getGraph( gv.getDotSource(), type ), out );
 
         }
