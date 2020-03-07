@@ -2,7 +2,7 @@ package sample;
 
 import java.util.Objects;
 
-public class Etat {
+public class Etat implements Comparable<Etat> {
 
 
     public Etat(String name) {
@@ -72,4 +72,8 @@ public class Etat {
     private Boolean accessible ;
     private Boolean coaccessible ;
 
+    @Override
+    public int compareTo(Etat o) {
+        return this.getName().compareTo(o.getName()) ;
+    }
 }

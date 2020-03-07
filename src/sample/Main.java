@@ -17,9 +17,16 @@ public class Main  {
 
         Automate automate = new Automate();
         automate.afficherAutomate();
+        automate.dessinerAutomate("automate","pdf");
+        Automate automateC = automate.complement();
+        automateC.afficherAutomate();
+        automateC.dessinerAutomate("automate complement","pdf");
+        automate.dessinerAutomate("automate 2","pdf");
+        Automate automateD = automate.determiner();
+        automateD.afficherAutomate();
+        automateD.dessinerAutomate("automate deterministe","pdf");
         Automate automateR =  automate.reduireAutomate();
         automateR.afficherAutomate();
-        automate.dessinerAutomate("automate","pdf");
         automateR.dessinerAutomate("automate réduit","pdf");
         Automate automateF = automate.eliminerLongueTr();
        automateF.afficherAutomate();

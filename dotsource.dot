@@ -1,10 +1,8 @@
 digraph G {
+S1 [shape=doublecircle];
+S2 [shape=doublecircle];
 S0 [style=filled, fillcolor=green];
-S4 -> S0;
-S0 -> S0;
-S0 -> S2;
-S0 -> S3;
-S1 -> S0;
-S1 -> S2;
-S1 -> S3;
+S0 -> S1 [label=a];
+S0 -> S2 [label=b];
+S2 -> S1 [label=a];
 }

@@ -4,7 +4,6 @@ import graphvizapi.Graphviz;
 
 import java.io.File;
 import java.util.*;
-
 public class Automate {
     private HashSet<Lettre> alphabet ;
     private Etat etatInitail ;
@@ -12,13 +11,13 @@ public class Automate {
     private HashMap<Etat, HashMap<Etat,HashMap<String, HashSet<Transition>>>> instructions ;
     private HashSet<Etat> etatsFinaux ;
     private HashMap<String,Etat> tousEtats ;
-
     public Automate(HashSet<Lettre> alphabet, Etat etatInitail, HashMap<Etat, HashMap<Etat, HashMap<String,HashSet<Transition>>>> instructions, HashSet<Etat> etatsFinaux, HashMap<String, Etat> tousEtats) {
         this.alphabet = alphabet;
         this.etatInitail = etatInitail;
         this.instructions = instructions;
         this.etatsFinaux = etatsFinaux;
         this.tousEtats = tousEtats;
+
     }
 
     public Automate() {
@@ -321,6 +320,113 @@ public class Automate {
             while (!pasmodif);
             return new Automate(this.alphabet, this.etatInitail, instructionsS, etatsFinauxS, tousEtatsS);
         }
+        public Automate determiner()
+        {
+
+            HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsD = new HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>();
+            HashSet<Etat> etatsFinauxD = new HashSet<Etat>()  ;
+            HashMap<String,Etat> tousEtatsD = new HashMap<String,Etat>();
+            Deque<EtatMultiple> pile = new ArrayDeque<EtatMultiple>();
+            TreeSet<Etat> ss = new TreeSet<Etat>() ;
+            ss.add(this.etatInitail);
+            EtatMultiple etaM = new EtatMultiple(ss) ;
+            System.out.println(etaM.getName());
+            pile.push(etaM);
+            tousEtatsD.put(this.etatInitail.getName(),this.etatInitail);
+            instructionsD.put(this.etatInitail,new HashMap<Etat,HashMap<String,HashSet<Transition>>>());
+            while (!pile.isEmpty())
+            {
+                EtatMultiple etatMultiple = pile.peekFirst();
+                System.out.println(etatMultiple.getName());
+                pile.removeFirst();
+                if(instructionsD.get(tousEtatsD.get(etatMultiple.getName())).isEmpty()) // ie cet état est non traité déja
+                {
+                    for (Lettre l : this.alphabet
+                    ) {
+                        System.out.println("lettre "+l.getLettre());
+                        ss = new TreeSet<Etat>() ;
+                        boolean estfinal = false;
+                        for (Etat etat : etatMultiple.getComposants()
+                        ) {
+                            System.out.println(" etat "+etat.getName());
+                            for (Etat etatdst : instructions.get(tousEtats.get(etat.getName())).keySet()
+                            ) {
+                                System.out.println("etat dest "+etatdst.getName());
+                                if (instructions.get(tousEtats.get(etat.getName())).get(tousEtats.get(etatdst.getName())).containsKey(String.valueOf(l.getLettre()))) {
+                                    System.out.println("am adding "+etatdst.getName());
+                                    ss.add(etatdst);
+                                    if (etatdst.EstFinal()) {
+                                        estfinal = true;
+                                    }
+                                }
+                            }
+                        }
+                        for (Etat es: ss
+                             ) {
+                            System.out.println("ss_"+es.getName());
+                        }
+                        if(!ss.isEmpty()) {
+                            etaM = new EtatMultiple(ss);
+                            System.out.println("new etatMultiple " + etaM.getName());
+                            Etat nouvelEtat = new Etat(etaM.getName());
+                            nouvelEtat.setEstFinal(estfinal);
+                            if (estfinal) {
+                                etatsFinauxD.add(nouvelEtat);
+                            }
+                            if (!tousEtatsD.containsKey(etaM.getName())) { // l'etat destinataire trouvé  n'existe pas déja
+
+                                tousEtatsD.put(nouvelEtat.getName(), nouvelEtat);
+                                instructionsD.put(nouvelEtat, new HashMap<Etat, HashMap<String, HashSet<Transition>>>());
+                            }
+                            instructionsD.get(tousEtatsD.get(etatMultiple.getName())).put(tousEtatsD.get(nouvelEtat.getName()), new HashMap<String, HashSet<Transition>>());
+                            instructionsD.get(tousEtatsD.get(etatMultiple.getName())).get(tousEtatsD.get(nouvelEtat.getName())).put(String.valueOf(l.getLettre()), new HashSet<Transition>());
+                            instructionsD.get(tousEtatsD.get(etatMultiple.getName())).get(tousEtatsD.get(nouvelEtat.getName())).get(String.valueOf(l.getLettre())).add(new Transition(tousEtatsD.get(etatMultiple.getName()), String.valueOf(l.getLettre()), nouvelEtat));
+                            // empilement de la nouvel état , si elle est empilé déja et mis en attente on empile pas
+                            // si elle n'est pas empilé mais déja traité la condition que elle ne contient pas de transitions nous s"assure qu'elle traité
+                            if (!pile.contains(etaM)) {
+                                pile.push(etaM);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+
+            return new Automate(this.alphabet, this.etatInitail, instructionsD, etatsFinauxD, tousEtatsD);
+
+        }
+        public Automate complement(){
+
+            HashMap<String,Etat> tousEtatsC = (HashMap<String,Etat>) tousEtats.clone();
+            HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>> instructionsC = (HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>) instructions.clone() ;
+          //  if(etatsFinaux.size()>1) {
+                String name = "";
+                for (Etat ef : etatsFinaux
+                ) {
+                    name = name.concat(ef.getName());
+                }
+                Etat etatInitailC = new Etat(name);
+                etatInitailC.setEstInitial(true);
+                tousEtatsC.put(name, etatInitailC);
+                instructionsC.put(etatInitailC, new HashMap<Etat, HashMap<String, HashSet<Transition>>>());
+                for (Etat ef : etatsFinaux
+                ) {
+                    tousEtatsC.get(ef.getName()).setEstFinal(false);
+                    instructionsC.get(etatInitailC).put(ef, new HashMap<String, HashSet<Transition>>());
+                    instructionsC.get(etatInitailC).get(ef).put(".", new HashSet<Transition>());
+                    instructionsC.get(etatInitailC).get(ef).get(".").add(new Transition(etatInitailC, ".", ef));
+                }
+
+
+
+                HashSet<Etat> etatsFinauxC = new HashSet<Etat>();
+                Etat etatF = tousEtatsC.get(this.etatInitail.getName());
+                etatF.setEstFinal(true);
+                etatF.setEstInitial(false);
+                etatsFinauxC.add(etatF);
+                return new Automate(this.alphabet, etatInitailC, instructionsC, etatsFinauxC, tousEtatsC);
+        }
         public void afficherAutomate()
         {
             System.out.println("alpha :");
@@ -350,7 +456,7 @@ public class Automate {
             gv.addln(gv.start_graph());
             for (Etat h: this.etatsFinaux
                  ) {
-                gv.addln(h.getName()+" [color=blue];");
+                gv.addln(h.getName()+" [shape=doublecircle];");
             }
             gv.addln(this.etatInitail.getName()+" [style=filled, fillcolor=green];");
             for (Etat e:instructions.keySet()
@@ -361,7 +467,16 @@ public class Automate {
                          ) {
                         for (Transition tr: instructions.get(e).get(f).get(str)
                         ) {
-                            gv.addln(tr.getEtatSrc().getName()+" -> "+tr.getEtatDest().getName()+";");
+                            //if(str.length()==1)
+                         //   System.out.println(str);
+                            if(str.equals(".")){
+                              //  System.out.println(tr.getEtatSrc().getName()+" -> "+tr.getEtatDest().getName()+" [label="+str+"];");
+                                gv.addln(tr.getEtatSrc().getName()+" -> "+tr.getEtatDest().getName()+" [label=eps];");
+                            }
+                            else {
+                           // System.out.println(tr.getEtatSrc().getName()+" -> "+tr.getEtatDest().getName()+" [label="+str+"];");
+                            gv.addln(tr.getEtatSrc().getName()+" -> "+tr.getEtatDest().getName()+" [label="+str+"];");}
+                        //    else {gv.addln(tr.getEtatSrc().getName()+" -> "+tr.getEtatDest().getName()+";");}
 
 
                         }
@@ -374,5 +489,50 @@ public class Automate {
             File out = new File("C:/graphViz/"+nomFile+"."+ type);
             gv.writeGraphToFile( gv.getGraph( gv.getDotSource(), type ), out );
 
+        }
+        public class EtatMultiple implements Comparable<EtatMultiple>
+        {
+            public EtatMultiple(TreeSet<Etat> composants) {
+                this.composants = new TreeSet<Etat>() ;
+                this.name = new String() ;
+                this.composants = (SortedSet<Etat>) composants.clone() ;
+                String tmp ="";
+                for (Etat e:this.composants
+                     ) {
+                    tmp = tmp.concat(e.getName());
+                    System.out.println("tmp = "+tmp);
+                }
+                this.name= tmp ;
+                System.out.println("name = "+this.name);
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                EtatMultiple that = (EtatMultiple) o;
+                return Objects.equals(name, that.name) ;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(name);
+            }
+
+            public Set<Etat> getComposants() {
+                return composants;
+            }
+
+            private String name;
+            private SortedSet<Etat> composants;
+
+            @Override
+            public int compareTo(EtatMultiple o) {
+                return this.name.compareTo(o.getName());
+            }
         }
 }
