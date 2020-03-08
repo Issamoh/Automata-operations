@@ -4,6 +4,7 @@ import graphvizapi.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Scanner;
 
 /*
 Remember: you just need to change the values of two parameters in the code: cfgProp and TEMP_DIR. in Graphviz.java class
@@ -17,10 +18,29 @@ public class Main  {
 
         Automate automate = new Automate();
         automate.afficherAutomate();
-        automate.dessinerAutomate("automate","pdf");
-        Automate automateC = automate.complement();
+        automate.dessinerAutomate("1 automate","pdf");
+       /* Automate automateC = automate.complement();
         automateC.afficherAutomate();
-        automateC.dessinerAutomate("automate complement","pdf");
+        automateC.dessinerAutomate("automate complement","pdf");*/
+        Automate automateR =  automate.reduireAutomate();
+        automateR.afficherAutomate();
+        automateR.dessinerAutomate("2 automate réduit","pdf");
+        Automate automateRT = automateR.eliminerLongueTr();
+        automateRT.dessinerAutomate("3 automate réduit ss lng tr","pdf");
+        Automate automateRTS = automateRT.eliminerSpontane();
+        automateRTS.dessinerAutomate("4 automate réduit simple","pdf");
+        Automate automateRTSD = automateRTS.determiner();
+        automateRTSD.dessinerAutomate("5 automate réduit simple déterministe","pdf");
+        System.out.println("Lecture des mots");
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Veuillez donner un mot ( = pour s'arrêter) :");
+        String m = sc.next();
+        while (!m.equals("=")) {
+            System.out.println(automateRTSD.readWord(m));
+            System.out.println("Veuillez donner un mot ( = pour s'arrêter) :");
+            m = sc.next();
+        }
+
        /* Automate automateM = automate.miroire();
         automateM.afficherAutomate();
         automateM.dessinerAutomate("automate miroire","pdf");

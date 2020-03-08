@@ -475,6 +475,49 @@ public class Automate {
 */
             return new Automate(this.alphabet,tousEtatsC.get(etatInitail.getName()), instructionsC, etatsFinauxC, tousEtatsC);
         }
+        public String readWord(String mot) {
+            String chemin = this.etatInitail.getName();
+            Etat previous = this.etatInitail;
+            Character ch = mot.charAt(0);
+            boolean stop = true;
+            for (Etat etatDst : instructions.get(etatInitail).keySet()
+            ) {
+                if (instructions.get(etatInitail).get(etatDst).containsKey(String.valueOf(ch))) {
+                    chemin = chemin.concat("->".concat(etatDst.getName()));
+                    System.out.println(chemin);
+                    previous = etatDst;
+                    mot = mot.substring(1);
+                    stop = false;
+                    break;
+
+                }
+            }
+            while (!mot.isEmpty() && !stop) {
+                stop = true;
+                System.out.println("am here");
+                ch = mot.charAt(0);
+                for (Etat etatDst : instructions.get(previous).keySet()
+                ) {
+                    if (instructions.get(previous).get(etatDst).containsKey(String.valueOf(ch))) {
+                      chemin =  chemin.concat("->".concat(etatDst.getName()));
+                        System.out.println(chemin);
+                        previous = etatDst;
+                        mot = mot.substring(1);
+                        stop = false;
+                        break;
+
+                    }
+
+                }
+            }
+            System.out.println("previous: "+previous.getName());
+            System.out.println("mot "+mot);
+            if (previous.EstFinal() && mot.isEmpty()) {
+                return "Ce mot se lit suivant le chemin : ".concat(chemin);
+            } else {
+                return "Je me suis bloqué aprés : ".concat(chemin);
+            }
+        }
         public void afficherAutomate()
         {
             System.out.println("alpha :");
