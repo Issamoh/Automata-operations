@@ -1,13 +1,11 @@
 digraph G {
-S1S2 [shape=doublecircle];
-S2 [shape=doublecircle];
-S0 [style=filled, fillcolor=green];
-S1S2 -> S0S1 [label=0];
-S1S2 -> S2 [label=1];
-S0 -> S1S2 [label=1];
-S0S1 -> S1S2 [label=1];
-S0S1 -> S1 [label=0];
-S1 -> S1 [label=0];
-S1 -> S2 [label=1];
-S2 -> S0 [label=0];
+rankdir="LR";
+S0 [shape=doublecircle];
+S2 [style=filled, fillcolor=green];
+S0_1 -> S0 [label=1];
+S0 -> S2 [label=0];
+S1 -> S0 [label=1];
+S1 -> S1 [label=1];
+S2 -> S0_1 [label=1];
+S2 -> S1 [label=1];
 }

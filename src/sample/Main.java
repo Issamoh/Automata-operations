@@ -15,23 +15,36 @@ public class Main  {
 
 
     public static void main(String[] args) {
-
+        System.out.println("*********       Ecole nationale supérieure d'informatique         *********");
+        System.out.println("*************       TP THP 2019-2020                          *************");
+        System.out.println("**** Enoncé : Programmer différentes opéations sur les automates       ****");
+        System.out.println("**** Réalisé par : Ben messaoud Mohammed Issam Daoud        G08|SB     ****");
+        System.out.println("***************************************************************************");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("1- Construction de l'automate ....");
         Automate automate = new Automate();
-        automate.afficherAutomate();
+       // automate.afficherAutomate();
         automate.dessinerAutomate("1 automate","pdf");
-       /* Automate automateC = automate.complement();
-        automateC.afficherAutomate();
-        automateC.dessinerAutomate("automate complement","pdf");*/
+        System.out.println("2- Réduction de l'automate ....");
         Automate automateR =  automate.reduireAutomate();
-        automateR.afficherAutomate();
+      //  automateR.afficherAutomate();
         automateR.dessinerAutomate("2 automate réduit","pdf");
+        System.out.println("3- Construction de l'automate partiellement généralisé   ....");
         Automate automateRT = automateR.eliminerLongueTr();
-        automateRT.dessinerAutomate("3 automate réduit ss lng tr","pdf");
+        automateRT.dessinerAutomate("3 automate réduit partiellement généralisé","pdf");
+        System.out.println("4- Construction de l'automate simple   ....");
         Automate automateRTS = automateRT.eliminerSpontane();
         automateRTS.dessinerAutomate("4 automate réduit simple","pdf");
+        //automate.dessinerAutomate("0 automate 2","pdf");
+        System.out.println("5- Déterminisation de l'automate simple   ....");
         Automate automateRTSD = automateRTS.determiner();
         automateRTSD.dessinerAutomate("5 automate réduit simple déterministe","pdf");
-        System.out.println("Lecture des mots");
+        System.out.println("6- Rendre l'automate complet   ....");
+        automateRTSD.rendreComplet();
+        automateRTSD.dessinerAutomate("6 automate réduit simple déterministe complet","pdf");
+        System.out.println("7- Lecture des mots ....");
         Scanner sc = new Scanner(System.in);
         System.out.println("Veuillez donner un mot ( = pour s'arrêter) :");
         String m = sc.next();
@@ -40,11 +53,16 @@ public class Main  {
             System.out.println("Veuillez donner un mot ( = pour s'arrêter) :");
             m = sc.next();
         }
+        System.out.println("8- Construction de l'automate du complement   ....");
+         Automate automateC = automateRTSD.complement();
+        //automateC.afficherAutomate();
+        automateC.dessinerAutomate("7 automate complement","pdf");
+        System.out.println("9- Construction de l'automate du miroire  ....");
+        Automate automateM = automateRT.miroire();
+        //  automateM.afficherAutomate();
+        automateM.dessinerAutomate("8 automate miroire","pdf");
 
-       /* Automate automateM = automate.miroire();
-        automateM.afficherAutomate();
-        automateM.dessinerAutomate("automate miroire","pdf");
-
+/*
         automate.dessinerAutomate("automate 2","pdf");
         Automate automateD = automate.determiner();
         automateD.afficherAutomate();

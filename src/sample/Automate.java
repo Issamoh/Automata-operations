@@ -1,4 +1,9 @@
 package sample;
+/**************************************************
+ * Ce travail est fait par Ben messaoud Mohammed Issam Daoud, étudiant en 3 éme année à L'ESI
+ * 2019-2020
+ * Adresse : hm_ben_messaoud@esi.dz, github.com/Issamoh
+ */
 
 import graphvizapi.Graphviz;
 
@@ -74,14 +79,6 @@ public class Automate {
             i++;
             System.out.println(i+" éme état : ");
             s = sc.next();
-        }
-        for (String e: tousEtats.keySet()
-        ) {
-            System.out.println(e);
-        }
-        for (Etat e: instructions.keySet()
-        ) {
-            System.out.println(e.getName()+" accessible : "+e.getAccessible());
         }
         // lecture des différentes transitions :*******************************************************************
         int j;
@@ -220,14 +217,18 @@ public class Automate {
                 //new HashMap<Etat, HashMap<Etat,HashMap<String,HashSet<Transition>>>>() ;
         HashSet<Etat> etatsFinauxF = (HashSet<Etat>) etatsFinaux.clone() ;
         HashMap<String,Etat> tousEtatsF = (HashMap<String,Etat>) tousEtats.clone();
-        for (Etat e:instructions.keySet() // pour chaque état
+        Set<Etat> iter = new TreeSet<Etat>();
+        iter.addAll(instructions.keySet()) ;
+        for (Etat e:iter // pour chaque état
         ) {
-            for (Etat f:instructions.get(e).keySet() // pour chaque état destinataire
+            Set<Etat> iterDst = new TreeSet<Etat>();
+            iterDst.addAll(instructions.get(e).keySet()) ;
+            for (Etat f:iterDst // pour chaque état destinataire
             ) {
                 for (String str:instructions.get(e).get(f).keySet() // pour chaque mot de transition
                 ) { // si la transition se fait avec un mot w tq |w| > 1 éclater la transition
                     if(str.length()>1){
-                        System.out.println("am here");
+                       // System.out.println("am here");
                     for (Transition tr: instructions.get(e).get(f).get(str)
                     ) {
                         Etat sauv ;
@@ -267,7 +268,7 @@ public class Automate {
 
                     }}
                 }
-        return new Automate(this.alphabet,this.etatInitail,instructionsF,etatsFinauxF,tousEtatsF);
+        return new Automate(this.alphabet,tousEtatsF.get(this.etatInitail.getName()),instructionsF,etatsFinauxF,tousEtatsF);
                 }
         public Automate   eliminerSpontane(){
             // élimination des transitions spontanées qui sont représentées avec "."
@@ -303,7 +304,7 @@ public class Automate {
                                         }
                                     }
                                 }
-                                System.out.println("i am deleting "+tr.getEtatSrc().getName()+" " + tr.getLettreTr() + " -> " + tr.getEtatDest().getName());
+                             //   System.out.println("i am deleting "+tr.getEtatSrc().getName()+" " + tr.getLettreTr() + " -> " + tr.getEtatDest().getName());
                                 instructionsS.get(e).get(f).get(".").remove(tr);
                                 if (instructionsS.get(e).get(f).get(".").isEmpty())
                                     instructionsS.get(e).get(f).remove(".");
@@ -337,23 +338,23 @@ public class Automate {
             while (!pile.isEmpty())
             {
                 EtatMultiple etatMultiple = pile.peekFirst();
-                System.out.println(etatMultiple.getName());
+              //  System.out.println(etatMultiple.getName());
                 pile.removeFirst();
                 if(instructionsD.get(tousEtatsD.get(etatMultiple.getName())).isEmpty()) // ie cet état est non traité déja
                 {
                     for (Lettre l : this.alphabet
                     ) {
-                        System.out.println("lettre "+l.getLettre());
+                      //  System.out.println("lettre "+l.getLettre());
                         ss = new TreeSet<Etat>() ;
                         boolean estfinal = false;
                         for (Etat etat : etatMultiple.getComposants()
                         ) {
-                            System.out.println(" etat "+etat.getName());
+                          //  System.out.println(" etat "+etat.getName());
                             for (Etat etatdst : instructions.get(tousEtats.get(etat.getName())).keySet()
                             ) {
-                                System.out.println("etat dest "+etatdst.getName());
+                               // System.out.println("etat dest "+etatdst.getName());
                                 if (instructions.get(tousEtats.get(etat.getName())).get(tousEtats.get(etatdst.getName())).containsKey(String.valueOf(l.getLettre()))) {
-                                    System.out.println("am adding "+etatdst.getName());
+                                  //  System.out.println("am adding "+etatdst.getName());
                                     ss.add(etatdst);
                                     if (etatdst.EstFinal()) {
                                         estfinal = true;
@@ -361,13 +362,10 @@ public class Automate {
                                 }
                             }
                         }
-                        for (Etat es: ss
-                             ) {
-                            System.out.println("ss_"+es.getName());
-                        }
+
                         if(!ss.isEmpty()) {
                             etaM = new EtatMultiple(ss);
-                            System.out.println("new etatMultiple " + etaM.getName());
+                           // System.out.println("new etatMultiple " + etaM.getName());
                             Etat nouvelEtat = new Etat(etaM.getName());
                             nouvelEtat.setEstFinal(estfinal);
                             if (estfinal) {
@@ -396,6 +394,47 @@ public class Automate {
             return new Automate(this.alphabet, this.etatInitail, instructionsD, etatsFinauxD, tousEtatsD);
 
         }
+        public void rendreComplet()
+        {
+            Set<Etat> iter = new TreeSet<Etat>();
+            iter.addAll(instructions.keySet()) ;
+            for (Etat e:iter
+                 ) {
+                for (Lettre ch:this.alphabet
+                     ) {
+                    boolean kaeyn = false ;
+                    for (Etat ets:this.instructions.get(e).keySet()
+                    ) {
+                    if (this.instructions.get(e).get(ets).containsKey(String.valueOf(ch.getLettre()))){
+                        kaeyn = true ;
+                    }
+                    }
+                    if(!kaeyn)
+                    {
+                        if(!tousEtats.containsKey("SPuit")){
+                            Etat etatPuit = new Etat("SPuit");
+                            etatPuit.setEstFinal(false);
+                            etatPuit.setEstInitial(false);
+                            tousEtats.put(etatPuit.getName(),etatPuit);
+                            instructions.put(etatPuit,new HashMap<Etat,HashMap<String, HashSet<Transition>>>());
+                            instructions.get(etatPuit).put(etatPuit,new HashMap<String, HashSet<Transition>>() );
+                            for (Lettre lt:this.alphabet
+                                 ) {
+                                instructions.get(etatPuit).get(etatPuit).put(String.valueOf(lt.getLettre()),new HashSet<Transition>());
+                                instructions.get(etatPuit).get(etatPuit).get(String.valueOf(lt.getLettre())).add(new Transition(etatPuit,String.valueOf(lt.getLettre()),etatPuit));
+
+                            }
+                        }
+                        instructions.get(e).put(tousEtats.get("SPuit"),new HashMap<String, HashSet<Transition>>() );
+                        instructions.get(e).get(tousEtats.get("SPuit")).put(String.valueOf(ch.getLettre()),new HashSet<Transition>());
+                        instructions.get(e).get(tousEtats.get("SPuit")).get(String.valueOf(ch.getLettre())).add(new Transition(e,String.valueOf(ch.getLettre()),tousEtats.get("SPuit")));
+
+
+                    }
+                }
+
+            }
+        }
         public Automate miroire(){
 
             HashMap<String,Etat> tousEtatsM = (HashMap<String,Etat>) tousEtats.clone();
@@ -412,21 +451,25 @@ public class Automate {
                          ) {
                         for (Transition trs:instructions.get(st).get(dst).get(str)
                              ) {
+                            if(!instructionsM.get(dst).containsKey(st)){
                             instructionsM.get(dst).put(st,new HashMap<String, HashSet<Transition>>());
-                            instructionsM.get(dst).get(st).put(str,new HashSet<Transition>());
+                            instructionsM.get(dst).get(st).put(str,new HashSet<Transition>());}
+                           if(!instructionsM.get(dst).get(st).containsKey(str))
+                            { instructionsM.get(dst).get(st).put(str,new HashSet<Transition>());}
                             instructionsM.get(dst).get(st).get(str).add(new Transition(dst,str,st));
                         }
                     }
                 }
             }
 
-          //  if(etatsFinaux.size()>1) {
+               Etat etatInitailM = new Etat("");
+            if(etatsFinaux.size()>1) {
                 String name = "";
                 for (Etat ef : etatsFinaux
                 ) {
                     name = name.concat(ef.getName());
                 }
-                Etat etatInitailM = new Etat(name);
+                 etatInitailM = new Etat(name);
                 etatInitailM.setEstInitial(true);
                 tousEtatsM.put(name, etatInitailM);
                 instructionsM.put(etatInitailM, new HashMap<Etat, HashMap<String, HashSet<Transition>>>());
@@ -437,7 +480,15 @@ public class Automate {
                     instructionsM.get(etatInitailM).get(ef).put(".", new HashSet<Transition>());
                     instructionsM.get(etatInitailM).get(ef).get(".").add(new Transition(etatInitailM, ".", ef));
                 }
-
+            }
+            else {
+                for (Etat ef : etatsFinaux
+                ) {
+                    etatInitailM = new Etat(ef.getName());
+                    etatInitailM.setEstInitial(true);
+                    tousEtatsM.put(ef.getName(), etatInitailM);
+                }
+            }
 
 
                 HashSet<Etat> etatsFinauxM = new HashSet<Etat>();
@@ -484,7 +535,7 @@ public class Automate {
             ) {
                 if (instructions.get(etatInitail).get(etatDst).containsKey(String.valueOf(ch))) {
                     chemin = chemin.concat("->".concat(etatDst.getName()));
-                    System.out.println(chemin);
+                  //  System.out.println(chemin);
                     previous = etatDst;
                     mot = mot.substring(1);
                     stop = false;
@@ -494,13 +545,13 @@ public class Automate {
             }
             while (!mot.isEmpty() && !stop) {
                 stop = true;
-                System.out.println("am here");
+               // System.out.println("am here");
                 ch = mot.charAt(0);
                 for (Etat etatDst : instructions.get(previous).keySet()
                 ) {
                     if (instructions.get(previous).get(etatDst).containsKey(String.valueOf(ch))) {
                       chemin =  chemin.concat("->".concat(etatDst.getName()));
-                        System.out.println(chemin);
+                     //   System.out.println(chemin);
                         previous = etatDst;
                         mot = mot.substring(1);
                         stop = false;
@@ -510,8 +561,8 @@ public class Automate {
 
                 }
             }
-            System.out.println("previous: "+previous.getName());
-            System.out.println("mot "+mot);
+           // System.out.println("previous: "+previous.getName());
+           // System.out.println("mot "+mot);
             if (previous.EstFinal() && mot.isEmpty()) {
                 return "Ce mot se lit suivant le chemin : ".concat(chemin);
             } else {
@@ -545,6 +596,7 @@ public class Automate {
         public void dessinerAutomate(String nomFile, String type){
             Graphviz gv = new Graphviz();
             gv.addln(gv.start_graph());
+            gv.addln("rankdir=\"LR\";");
             for (Etat h: this.etatsFinaux
                  ) {
                 gv.addln(h.getName()+" [shape=doublecircle];");
@@ -591,10 +643,10 @@ public class Automate {
                 for (Etat e:this.composants
                      ) {
                     tmp = tmp.concat(e.getName());
-                    System.out.println("tmp = "+tmp);
+                    //System.out.println("tmp = "+tmp);
                 }
                 this.name= tmp ;
-                System.out.println("name = "+this.name);
+               // System.out.println("name = "+this.name);
             }
 
             public String getName() {
